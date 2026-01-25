@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio | Raspberry Pi Mini SOC (Pi-hole DNS Firewall)</title>
+
+  <!-- Security hardening (static site friendly) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self';
+          img-src 'self' data:;
+          style-src 'self' 'unsafe-inline';
+          script-src 'self';
+          object-src 'none';
+          base-uri 'none';
+          form-action 'none';
+          frame-ancestors 'none';
+          upgrade-insecure-requests
+        " />
+  <meta http-equiv="Referrer-Policy" content="no-referrer" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
+  <meta name="color-scheme" content="dark light" />
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#111826;
+      --text:#e8eef7;
+      --muted:#b7c3d6;
+      --line:#223046;
+      --accent:#7dd3fc;
+      --ok:#86efac;
+      --warn:#fbbf24;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:radial-gradient(1200px 600px at 20% 0%, #0f1a2a 0%, var(--bg) 60%), var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:980px; margin:0 auto; padding:28px 18px 60px}
+    header{
+      padding:22px 18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:linear-gradient(180deg, rgba(17,24,38,.95), rgba(17,24,38,.75));
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .title-row{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; justify-content:space-between}
+    h1{margin:0; font-size:28px}
+    .subtitle{margin:8px 0 0; color:var(--muted)}
+    .pill-row{margin-top:16px; display:flex; flex-wrap:wrap; gap:10px}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(15,26,42,.55);
+      color:var(--muted);
+      font-size:13px;
+    }
+    .dot{width:9px; height:9px; border-radius:50%}
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      gap:14px;
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(17,24,38,.80);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      padding:16px;
+    }
+    .span-12{grid-column:span 12}
+    .span-7{grid-column:span 7}
+    .span-5{grid-column:span 5}
+    .span-6{grid-column:span 6}
+    @media (max-width: 860px){
+      .span-7,.span-5,.span-6{grid-column:span 12}
+    }
+    h2{margin:0 0 10px; font-size:18px}
+    p{margin:10px 0; color:var(--muted)}
+    ul{margin:10px 0 0 18px; color:var(--muted)}
+    li{margin:6px 0}
+    .kpi{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 860px){ .kpi{grid-template-columns:1fr} }
+    .kpi .box{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(11,15,20,.35);
+    }
+    .kpi .label{color:var(--muted); font-size:12px}
+    .kpi .value{margin-top:6px; font-size:16px; color:var(--text)}
+    .code{
+      font-family:var(--mono);
+      font-size:13px;
+      color:var(--text);
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      white-space:pre;
+    }
+    .badge{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
+      background:rgba(11,15,20,.35);
+    }
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 860px){ .two-col{grid-template-columns:1fr} }
+    .callout{
+      border-left:4px solid var(--accent);
+      background:rgba(125,211,252,.08);
+      padding:10px 12px;
+      border-radius:12px;
+      color:var(--muted);
+    }
+
+    /* Screenshot styling */
+    figure{margin:0}
+    .shot{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(11,15,20,.35);
+    }
+    figcaption{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      text-align:center;
+      font-size:13px;
+    }
+    .hr{height:1px; background:var(--line); margin:12px 0}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="title-row">
+        <div>
+          <h1>Raspberry Pi Mini SOC</h1>
+          <p class="subtitle">DNS Firewall + Traffic Monitoring using Pi-hole (Raspberry Pi 5 + Windows 11)</p>
+        </div>
+        <div class="pill-row" aria-label="quick metadata">
+          <span class="pill"><span class="dot" style="background:var(--ok)"></span> Status: Working</span>
+          <span class="pill"><span class="dot" style="background:var(--accent)"></span> Platform: Pi 5 + Ubuntu LTS</span>
+          <span class="pill"><span class="dot" style="background:var(--warn)"></span> Client: Windows 11</span>
+        </div>
+      </div>
+
+      <div class="kpi" aria-label="key facts">
+        <div class="box">
+          <div class="label">Pi-hole Dashboard</div>
+          <div class="value"><span class="badge">Local LAN only</span></div>
+        </div>
+        <div class="box">
+          <div class="label">Real-time Monitoring</div>
+          <div class="value"><span class="badge">tail -f /var/log/pihole.log</span></div>
+        </div>
+        <div class="box">
+          <div class="label">Core Outcome</div>
+          <div class="value">Live DNS visibility + blocking</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card span-12">
+        <h2>Overview</h2>
+        <p>
+          I built a small security monitoring lab where a Raspberry Pi 5 runs Pi-hole as a DNS firewall.
+          A Windows 11 client routes DNS queries through the Pi, allowing me to observe and block ad, tracker,
+          and unwanted domains while practicing SOC-style troubleshooting and log analysis.
+        </p>
+        <div class="callout">
+          Upgrade plan: expand monitoring and detection capabilities on top of this stable foundation.
+        </div>
+      </div>
+
+      <div class="card span-12">
+        <h2>Screenshot Evidence</h2>
+        <p>
+          This screenshot is sanitized: internal IP addresses and hostnames are masked before publishing.
+        </p>
+
+        <!-- Put your image file in the same folder as this HTML OR inside /assets and update src -->
+        <figure>
+          <img
+            class="shot"
+            src="screenshotdashboard.png"
+            alt="Pi-hole Query Log showing DNS requests with client identifiers masked and hostname hidden for security."
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>
+            Figure 1: Pi-hole Query Log showing live DNS traffic and blocked tracking domains from a Windows 11 client
+            routed through a Raspberry Pi 5 DNS firewall. Internal IP addresses and hostnames were sanitized for security.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="card span-7">
+        <h2>Architecture</h2>
+        <p><strong>Traffic flow</strong></p>
+        <div class="code">Windows 11 Client
+   |
+   |  DNS (A/AAAA queries)
+   v
+Raspberry Pi 5 (Pi-hole DNS Firewall)
+   |
+   |  Forward to upstream resolver
+   v
+Internet</div>
+        <p>
+          Key idea: if the client uses the Pi as its DNS server, Pi-hole can log requests and block known unwanted domains
+          before the browser connects.
+        </p>
+      </div>
+
+      <div class="card span-5">
+        <h2>Tech Stack</h2>
+        <ul>
+          <li><strong>Hardware</strong>: Raspberry Pi 5</li>
+          <li><strong>OS</strong>: Ubuntu LTS</li>
+          <li><strong>Client</strong>: Windows 11</li>
+          <li><strong>Core Tool</strong>: Pi-hole</li>
+          <li><strong>Web</strong>: lighttpd</li>
+          <li><strong>Diagnostics</strong>: ping, nslookup, ss, ufw, tail</li>
+        </ul>
+      </div>
+
+      <div class="card span-12">
+        <h2>Implementation Steps</h2>
+
+        <div class="two-col">
+          <div>
+            <p><strong>1) Install Pi-hole on the Pi</strong></p>
+            <div class="code">curl -sSL https://install.pi-hole.net | sudo bash</div>
+            <p>Result: the installer outputs the dashboard URL and an initial password.</p>
+
+            <div class="hr"></div>
+
+            <p><strong>2) Secure the admin password</strong></p>
+            <div class="code">sudo setpassword</div>
+            <p>Changes the Pi-hole web interface password.</p>
+          </div>
+
+          <div>
+            <p><strong>3) Allow HTTP on the Pi (if firewall is enabled)</strong></p>
+            <div class="code">sudo ufw allow 80/tcp
+sudo ufw reload
+sudo ufw status</div>
+
+            <div class="hr"></div>
+
+            <p><strong>4) Point Windows 11 DNS to Pi-hole and flush cache</strong></p>
+            <div class="code">ipconfig /flushdns</div>
+            <p>Validate with:</p>
+            <div class="code">nslookup google.com</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <p><strong>5) Real-time DNS monitoring on the Pi</strong></p>
+        <div class="code">sudo tail -f /var/log/pihole.log</div>
+        <p>Open websites on the Windows 11 client and watch DNS queries appear live.</p>
+      </div>
+
+      <div class="card span-12">
+        <h2>Challenges and Fixes</h2>
+
+        <p><strong>Client isolation blocked PC to Pi access</strong></p>
+        <ul>
+          <li>Symptom: dashboard would not load from Windows, ping failed with “Destination host unreachable”.</li>
+          <li>Fix: moved both devices to a network that allows client-to-client communication.</li>
+          <li>Proof: ping started replying and the dashboard became reachable.</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <p><strong>Windows DNS bypassed Pi-hole via IPv6</strong></p>
+        <ul>
+          <li>Symptom: Pi-hole Query Log stayed empty even though browsing worked.</li>
+          <li>Diagnosis: nslookup showed an IPv6 router DNS server instead of the Pi.</li>
+          <li>Fix: configured Windows to use the Pi as the DNS server (IPv4) and removed the bypass path on the adapter.</li>
+          <li>Proof: nslookup reported the Pi as DNS server and logs appeared.</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <p><strong>Needed true real-time visibility</strong></p>
+        <ul>
+          <li>Symptom: web UI did not stream logs continuously.</li>
+          <li>Fix: used live log streaming from the Pi: <span class="badge">tail -f /var/log/pihole.log</span></li>
+        </ul>
+      </div>
+
+      <div class="card span-6">
+        <h2>What I Learned</h2>
+        <ul>
+          <li>DNS fundamentals and why DNS is a high-value security control.</li>
+          <li>How DNS firewalls block unwanted domains before connections happen.</li>
+          <li>How to validate traffic paths using ping and nslookup.</li>
+          <li>Why IPv6 DNS can bypass controls if not accounted for.</li>
+          <li>How to monitor logs in real time like a SOC analyst.</li>
+        </ul>
+      </div>
+
+      <div class="card span-6">
+        <h2>Resume Bullet</h2>
+        <p class="callout">
+          Deployed a Raspberry Pi 5 DNS firewall using Pi-hole and routed Windows 11 DNS queries through it for monitoring and blocking.
+          Verified end-to-end DNS routing, secured admin access, and used real-time logging to analyze domain activity.
+          Resolved client isolation and IPv6 DNS bypass to restore visibility and enforce DNS controls.
+        </p>
+      </div>
+
+      <div class="card span-12">
+        <h2>Next Upgrade Ideas</h2>
+        <ul>
+          <li>Add a private resolver (Unbound) for improved privacy and control.</li>
+          <li>Add threat-focused blocklists and document before and after metrics.</li>
+          <li>Export logs for analysis and create weekly security reports.</li>
+          <li>Add IDS later and correlate DNS with alerts.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      <p>Tip: keep the Pi-hole dashboard reachable only on your local network and sanitize screenshots before publishing.</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -54,7 +54,26 @@
       background:linear-gradient(180deg, rgba(17,24,38,.95), rgba(17,24,38,.75));
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
-    .title-row{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; justify-content:space-between}
+    .title-row{
+      display:flex; gap:16px; flex-wrap:wrap;
+      align-items:flex-start; justify-content:space-between
+    }
+    .header-actions{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+      margin-top:6px;
+    }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(15,26,42,.55);
+      color:var(--text);
+      font-size:13px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{background:rgba(15,26,42,.75); text-decoration:none}
     h1{margin:0; font-size:28px}
     .subtitle{margin:8px 0 0; color:var(--muted)}
     .pill-row{margin-top:16px; display:flex; flex-wrap:wrap; gap:10px}
@@ -86,6 +105,7 @@
     .span-6{grid-column:span 6}
     @media (max-width: 860px){
       .span-7,.span-5,.span-6{grid-column:span 12}
+      .header-actions{justify-content:flex-start}
     }
     h2{margin:0 0 10px; font-size:18px}
     p{margin:10px 0; color:var(--muted)}
@@ -156,6 +176,48 @@
       font-size:13px;
     }
 
+    /* Build history gallery */
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      gap:14px;
+      margin-top:10px;
+    }
+    .gcard{
+      grid-column:span 6;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(11,15,20,.22);
+      padding:14px;
+    }
+    @media (max-width: 860px){
+      .gcard{grid-column:span 12}
+    }
+    .gmeta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .tag{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(15,26,42,.55);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .thumb{
+      width:100%;
+      height:auto;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(11,15,20,.35);
+      margin-top:10px;
+    }
+
     footer{
       margin-top:18px;
       color:var(--muted);
@@ -173,11 +235,17 @@
         <div>
           <h1>Raspberry Pi Mini SOC</h1>
           <p class="subtitle">DNS Firewall + Traffic Monitoring using Pi-hole (Raspberry Pi 5 + Windows 11)</p>
+
+          <div class="pill-row" aria-label="quick metadata">
+            <span class="pill"><span class="dot" style="background:var(--ok)"></span> Status: Working</span>
+            <span class="pill"><span class="dot" style="background:var(--accent)"></span> Platform: Pi 5 + Ubuntu LTS</span>
+            <span class="pill"><span class="dot" style="background:var(--warn)"></span> Client: Windows 11</span>
+          </div>
         </div>
-        <div class="pill-row" aria-label="quick metadata">
-          <span class="pill"><span class="dot" style="background:var(--ok)"></span> Status: Working</span>
-          <span class="pill"><span class="dot" style="background:var(--accent)"></span> Platform: Pi 5 + Ubuntu LTS</span>
-          <span class="pill"><span class="dot" style="background:var(--warn)"></span> Client: Windows 11</span>
+
+        <div class="header-actions" aria-label="project navigation">
+          <a class="btn" href="build-2026-01-28-unbound.html">Today’s Upgrade: Unbound</a>
+          <a class="btn" href="#build-history">Build History</a>
         </div>
       </div>
 
@@ -188,7 +256,7 @@
         </div>
         <div class="box">
           <div class="label">Real-time Monitoring</div>
-          <div class="value"><span class="badge">tail -f /var/log/pihole.log</span></div>
+          <div class="value"><span class="badge">tail -f /var/log/pihole/pihole.log</span></div>
         </div>
         <div class="box">
           <div class="label">Core Outcome</div>
@@ -206,7 +274,7 @@
           and unwanted domains while practicing SOC-style troubleshooting and log analysis.
         </p>
         <div class="callout">
-          Upgrade plan: expand monitoring and detection capabilities on top of this stable foundation.
+          This site is a living build log. Each upgrade gets its own page and a new entry in the history gallery.
         </div>
       </div>
 
@@ -216,7 +284,6 @@
           This screenshot is sanitized: internal IP addresses and hostnames are masked before publishing.
         </p>
 
-        <!-- Put your image file in the same folder as this HTML OR inside /assets and update src -->
         <figure>
           <img
             class="shot"
@@ -241,7 +308,7 @@
    v
 Raspberry Pi 5 (Pi-hole DNS Firewall)
    |
-   |  Forward to upstream resolver
+   |  Forward to resolver
    v
 Internet</div>
         <p>
@@ -269,13 +336,11 @@ Internet</div>
           <div>
             <p><strong>1) Install Pi-hole on the Pi</strong></p>
             <div class="code">curl -sSL https://install.pi-hole.net | sudo bash</div>
-            <p>Result: the installer outputs the dashboard URL and an initial password.</p>
 
             <div class="hr"></div>
 
             <p><strong>2) Secure the admin password</strong></p>
             <div class="code">sudo setpassword</div>
-            <p>Changes the Pi-hole web interface password.</p>
           </div>
 
           <div>
@@ -296,8 +361,7 @@ sudo ufw status</div>
         <div class="hr"></div>
 
         <p><strong>5) Real-time DNS monitoring on the Pi</strong></p>
-        <div class="code">sudo tail -f /var/log/pihole.log</div>
-        <p>Open websites on the Windows 11 client and watch DNS queries appear live.</p>
+        <div class="code">sudo tail -f /var/log/pihole/pihole.log</div>
       </div>
 
       <div class="card span-12">
@@ -324,8 +388,7 @@ sudo ufw status</div>
 
         <p><strong>Needed true real-time visibility</strong></p>
         <ul>
-          <li>Symptom: web UI did not stream logs continuously.</li>
-          <li>Fix: used live log streaming from the Pi: <span class="badge">tail -f /var/log/pihole.log</span></li>
+          <li>Fix: used live log streaming: <span class="badge">sudo tail -f /var/log/pihole/pihole.log</span></li>
         </ul>
       </div>
 
@@ -344,19 +407,39 @@ sudo ufw status</div>
         <h2>Resume Bullet</h2>
         <p class="callout">
           Deployed a Raspberry Pi 5 DNS firewall using Pi-hole and routed Windows 11 DNS queries through it for monitoring and blocking.
-          Verified end-to-end DNS routing, secured admin access, and used real-time logging to analyze domain activity.
-          Resolved client isolation and IPv6 DNS bypass to restore visibility and enforce DNS controls.
+          Verified end-to-end DNS routing, secured admin access, used real-time logs to analyze domain activity,
+          and resolved client isolation and IPv6 DNS bypass to restore visibility and enforce DNS controls.
         </p>
       </div>
 
-      <div class="card span-12">
-        <h2>Next Upgrade Ideas</h2>
-        <ul>
-          <li>Add a private resolver (Unbound) for improved privacy and control.</li>
-          <li>Add threat-focused blocklists and document before and after metrics.</li>
-          <li>Export logs for analysis and create weekly security reports.</li>
-          <li>Add IDS later and correlate DNS with alerts.</li>
-        </ul>
+      <div class="card span-12" id="build-history">
+        <h2>Build History Gallery</h2>
+        <p>Click an entry to see the full notes. Add a new card each time you upgrade or change something.</p>
+
+        <div class="gallery">
+          <div class="gcard">
+            <div class="gmeta">
+              <span class="tag">Build #1</span>
+              <span class="tag">Pi-hole DNS Firewall</span>
+              <span class="tag">Windows 11</span>
+            </div>
+            <p><strong>Initial Build</strong></p>
+            <p>Installed Pi-hole, enabled logging, fixed network reachability and DNS bypass issues, validated live DNS monitoring.</p>
+            <img class="thumb" src="screenshotdashboard.png" alt="Sanitized Pi-hole query log screenshot thumbnail." loading="lazy" decoding="async" />
+          </div>
+
+          <div class="gcard">
+            <div class="gmeta">
+              <span class="tag">Build #2</span>
+              <span class="tag">Upgrade</span>
+              <span class="tag">Unbound</span>
+              <span class="tag">2026-01-28</span>
+            </div>
+            <p><strong>Local Recursive DNS</strong></p>
+            <p>Integrated Unbound on localhost (127.0.0.1:5335) and verified Pi-hole forwards queries to it.</p>
+            <p><a class="btn" href="build-2026-01-28-unbound.html">Open Upgrade Notes</a></p>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Build #2 | Unbound Upgrade (Local Recursive DNS)</title>
+
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self';
+          img-src 'self' data:;
+          style-src 'self' 'unsafe-inline';
+          script-src 'self';
+          object-src 'none';
+          base-uri 'none';
+          form-action 'none';
+          frame-ancestors 'none';
+          upgrade-insecure-requests
+        " />
+  <meta http-equiv="Referrer-Policy" content="no-referrer" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
+  <meta name="color-scheme" content="dark light" />
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#111826;
+      --text:#e8eef7;
+      --muted:#b7c3d6;
+      --line:#223046;
+      --accent:#7dd3fc;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:radial-gradient(1200px 600px at 20% 0%, #0f1a2a 0%, var(--bg) 60%), var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:980px; margin:0 auto; padding:28px 18px 60px}
+    .top{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(17,24,38,.85);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    .btn{
+      display:inline-flex; align-items:center;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(15,26,42,.55);
+      color:var(--text);
+      font-size:13px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover{background:rgba(15,26,42,.75); text-decoration:none}
+    h1{margin:0; font-size:22px}
+    .subtitle{margin:6px 0 0; color:var(--muted)}
+    .grid{margin-top:14px; display:grid; grid-template-columns:repeat(12, 1fr); gap:14px;}
+    .card{
+      grid-column:span 12;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(17,24,38,.80);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      padding:16px;
+    }
+    .code{
+      font-family:var(--mono);
+      font-size:13px;
+      color:var(--text);
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      white-space:pre;
+    }
+    ul{margin:10px 0 0 18px; color:var(--muted)}
+    p{margin:10px 0; color:var(--muted)}
+    .tag{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(15,26,42,.55);
+      font-size:12px;
+      color:var(--muted);
+      margin-right:6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="top">
+      <div>
+        <h1>Build #2: Unbound Upgrade (Local Recursive DNS)</h1>
+        <p class="subtitle">Date: 2026-01-28 • Goal: Remove third-party DNS and resolve locally through Unbound</p>
+        <div>
+          <span class="tag">Raspberry Pi 5</span>
+          <span class="tag">Ubuntu LTS</span>
+          <span class="tag">Pi-hole</span>
+          <span class="tag">Unbound</span>
+          <span class="tag">127.0.0.1:5335</span>
+        </div>
+      </div>
+      <div>
+        <a class="btn" href="index.html">Back to Home</a>
+      </div>
+    </div>
+
+    <section class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 10px; font-size:18px;">What changed today</h2>
+        <p>
+          Added Unbound as a local recursive DNS resolver on the Pi and configured Pi-hole to forward queries to
+          <strong>127.0.0.1#5335</strong>. This reduces reliance on public DNS providers and improves privacy and control.
+        </p>
+
+        <div class="code">Client (Windows 11, iPad)
+  ↓
+Pi-hole (filter + logging)
+  ↓
+Unbound (127.0.0.1:5335, recursive resolver)
+  ↓
+Root DNS servers</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px; font-size:18px;">Key commands used</h2>
+        <p><strong>Install Unbound</strong></p>
+        <div class="code">sudo apt update
+sudo apt install -y unbound</div>
+
+        <p><strong>Create config directory</strong></p>
+        <div class="code">sudo mkdir -p /etc/unbound/unbound.conf.d</div>
+
+        <p><strong>Create Unbound config file</strong></p>
+        <div class="code">sudo nano /etc/unbound/unbound.conf.d/pi-hole.conf</div>
+
+        <p><strong>Root hints</strong></p>
+        <div class="code">sudo mkdir -p /var/lib/unbound
+sudo wget -O /var/lib/unbound/root.hints https://www.internic.net/domain/named.cache</div>
+
+        <p><strong>Enable and start</strong></p>
+        <div class="code">sudo systemctl restart unbound
+sudo systemctl enable unbound
+sudo systemctl status unbound</div>
+
+        <p><strong>Direct Unbound test</strong></p>
+        <div class="code">dig google.com @127.0.0.1 -p 5335</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px; font-size:18px;">Validation evidence</h2>
+        <p>From real-time Pi-hole logs, Pi-hole forwarded DNS queries to Unbound on localhost:</p>
+        <div class="code">forwarded settings-win.data.microsoft.com to 127.0.0.1#5335
+reply settings-prod-scus-2.southcentralus.cloudapp.azure.com is 52.xxx.xxx.xxx</div>
+
+        <p><strong>Real-time monitoring command</strong></p>
+        <div class="code">sudo tail -f /var/log/pihole/pihole.log</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px; font-size:18px;">Portfolio-ready upgrade summary</h2>
+        <div class="code">Integrated Unbound as a local recursive DNS resolver and configured Pi-hole to forward queries to 127.0.0.1:5335.
+Validated end-to-end resolution using dig and real-time Pi-hole logs, confirming local DNS resolution without third-party resolvers.</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

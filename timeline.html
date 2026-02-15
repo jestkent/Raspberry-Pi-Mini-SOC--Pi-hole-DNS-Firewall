@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SOC Activity Timeline | Mini SOC Lab</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0b0f14;
+  color:#e8eef7;
+}
+.container{max-width:1000px;margin:auto;padding:40px 20px}
+h1{margin-bottom:10px}
+.subtitle{color:#a9b4c7;margin-bottom:30px}
+
+.timeline{
+  position:relative;
+  margin-left:20px;
+  border-left:3px solid #223046;
+  padding-left:25px;
+}
+
+.event{
+  margin-bottom:30px;
+  padding:18px;
+  background:#111826;
+  border-radius:14px;
+  border:1px solid #223046;
+}
+
+.event::before{
+  content:"";
+  position:absolute;
+  left:-10px;
+  width:14px;
+  height:14px;
+  background:#7dd3fc;
+  border-radius:50%;
+}
+
+.tag{
+  font-size:12px;
+  color:#9fb3c8;
+}
+
+.title{
+  font-size:18px;
+  margin:6px 0;
+}
+
+.desc{
+  color:#b7c3d6;
+}
+
+a.button{
+  display:inline-block;
+  margin-top:12px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#0f1a2a;
+  border:1px solid #223046;
+  color:#e8eef7;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>Mini SOC Lab Activity Timeline</h1>
+<p class="subtitle">Security investigation log and upgrades</p>
+
+<div class="timeline">
+
+<div class="event">
+<div class="tag">Day 1 • Detection</div>
+<div class="title">DNS Traffic Not Visible</div>
+<div class="desc">
+Client browsing worked but Pi-hole logs empty. Discovered DNS bypass via IPv6.
+</div>
+<a class="button" href="index.html">View Investigation</a>
+</div>
+
+<div class="event">
+<div class="tag">Day 1 • Mitigation</div>
+<div class="title">Restored DNS Visibility</div>
+<div class="desc">
+Forced Windows client to use Pi as DNS. Logs started appearing in real time.
+</div>
+<a class="button" href="index.html#challenges">View Fix</a>
+</div>
+
+<div class="event">
+<div class="tag">Upgrade • Hardening</div>
+<div class="title">Local Recursive DNS (Unbound)</div>
+<div class="desc">
+Removed dependency on public DNS providers and validated local resolution.
+</div>
+<a class="button" href="build-2026-01-28-unbound.html">Open Case</a>
+</div>
+
+<div class="event">
+<div class="tag">Upgrade • Access Security</div>
+<div class="title">SSH Key Authentication</div>
+<div class="desc">
+Configured passwordless key authentication to secure remote administration.
+</div>
+<a class="button" href="#">(next upgrade page)</a>
+</div>
+
+</div>
+</div>
+</body>
+</html>
